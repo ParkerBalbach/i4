@@ -1,3 +1,4 @@
+from pl_evalexception import EvalException
 #!/usr/bin/env python
 """ generated source for module Node """
 
@@ -176,6 +177,15 @@ class NodeStmt(Node):
     def eval(self, env):
         """ generated source for method eval """
         return self.node.eval(env)
+
+class NodeRd(Node):
+    def __init__(self, _id):
+        super(NodeRd, self).__init__()
+        self.id = _id
+
+        def eval(self, env):
+            r = input()
+            return env.put(self.id, float(r))
 
 
 class NodeTerm(Node):

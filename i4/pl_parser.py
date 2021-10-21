@@ -97,6 +97,12 @@ class Parser(object):
         wr = NodeWr(expr)
         return wr
 
+    def parseRd(self):
+        self.match('rd')
+        _id = self.curr()
+        self.match('id')
+        return NodeRd(_id.lex())
+
     def parseStmt(self):
         """ generated source for method parseStmt """
         if self.curr() == Token("wr"):
@@ -105,6 +111,9 @@ class Parser(object):
         if self.curr() == Token("id"):
             assn = self.parseAssn()
             return NodeStmt(assn)
+        if self.curr() == Token('rd'):
+            rd = self.parseRd()
+            return NodeStmt(rd)
         return None
 
     def parseBlock(self):
