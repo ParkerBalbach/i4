@@ -1,5 +1,5 @@
 from pl_evalexception import EvalException
-#!/usr/bin/env python
+#!/usr/bin/env python"
 """ generated source for module Node """
 
 #  (C) 2013 Jim Buffenbarger
@@ -183,9 +183,83 @@ class NodeRd(Node):
         super(NodeRd, self).__init__()
         self.id = _id
 
-        def eval(self, env):
-            r = input()
-            return env.put(self.id, float(r))
+    def eval(self, env):
+        r = input()
+        return env.put(self.id, float(r))
+
+class NodeBg(Node):
+    def __init__(self, block):
+        super(NodeBg, self).__init__()
+        self.block = block
+
+    def eval(self, env):
+        return self.block.eval(env)
+
+class NodeRelop(Node):
+    def __init__(self, pos, relop): 
+        super(NodeRelop, self).__init__()
+        self.pos = pos
+        self.relop = relop
+
+    def op(self, o1, o2):
+        if self.relop == '<':
+            return o1 < o2
+        if self.relop == '<=':
+            return o1 <= o2
+        if self.relop == '>':
+            return o1 > o2
+        if self.relop == '>=':
+            return o1 >= o2
+        if self.relop == '<>':
+            return o1 != o2
+        if self.relop == '==':
+            return o1 == o2
+        raise EvalException(self.pos, 'op not recognized: ' + self.relop)
+
+class NodeIfThen(Node):
+    def __init__(self, boolexpr, stmt):
+        super(NodeIfThen, self).__init__()
+        self.boolexpr = boolexpr
+        self.stmt = stmt
+    
+    def eval(self, env):
+        if self.boolexpr.eval(env):
+            return self.stmt.eval(env)
+        return None
+
+class NodeBoolExpr(Node):
+    def __init__(self, left, relop, right):
+        super(NodeBoolExpr, self).__init__()
+        self.left = left
+        self.relop = relop
+        self.right = right
+
+    def eval(self, env):
+        return self.relop.op(self.left.eval(env), self.right.eval(env))
+
+
+class NodeIfThenElse(Node):
+    def __init__(self, boolexpr, stmt, else_stmt):
+        super(NodeIfThenElse, self).__init__()
+        self.boolexpr = boolexpr
+        self.stmt = stmt
+        self.else_stmt = else_stmt
+
+    def eval(self, env):
+        if (self.boolexpr.eval(env)):
+            return self.stmt.eval(env)
+        return self.else_stmt.eval(env)
+
+class NodeWhile(Node):
+    def __init__(self, boolexpr, stmt):
+        super(NodeWhile, self).__init__()
+        self.boolexpr = boolexpr
+        self.stmt = stmt
+    
+    def eval(self, env):
+        while (self.boolexpr.eval(env)):
+            self.stmt.eval(env)
+        return None
 
 
 class NodeTerm(Node):

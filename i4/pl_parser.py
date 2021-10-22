@@ -103,6 +103,63 @@ class Parser(object):
         self.match('id')
         return NodeRd(_id.lex())
 
+    def parseBg(self): #
+        self.match('begin')
+        block = self.parseBlock()
+        self.match('end')
+        return NodeBg(block)
+
+    def parseRelop(self): # relop
+        if self.curr() == Token('<'):
+            self.match('>')
+            return NodeRelop(self.pos(), '<')
+        if self.curr() == Token('<='):
+            self.match('<=')
+            return NodeRelop(self.pos(), '<=')
+        if self.curr() == Token('>'):
+            self.match('>')
+            return NodeRelop(self.pos(), '>')
+        if self.curr() == Token('>='):
+            self.match('>=')
+            return NodeRelop(self.pos(), '>=')
+        if self.curr() == Token('<>'):
+            self.match('<>')
+            return NodeRelop(self.pos(), '<>')
+        if self.curr() == Token('=='):
+            self.match('==')
+            return NodeRelop(self.pos(), '==')
+        return None
+
+    def parseBoolExpr(self):
+        left = self.parseExpr()
+        relop = self.parseRelop()
+        right = self.parseExpr()
+        boolexpr = NodeBoolExpr(left, relop, right)
+        return boolexpr
+
+    def parseIfThenElse(self): # if then
+        self.match('if')
+        boolexpr = self.parseBoolExpr()
+        self.match('then')
+        stmt = self.parseStmt()
+        if self.curr() == Token('else'):
+            self.match('else')
+            else_stmt = self.parseStmt()
+            return NodeIfThenElse(boolexpr, stmt, else_stmt)
+        else:
+            return NodeIfThen(boolexpr, stmt)
+
+    def parseWhile(self):
+        self.match('while')
+        boolexpr = self.parseBoolExpr()
+        self.match('do')
+        stmt = None
+        if self.curr() != None:
+            stmt = self.parseStmt()
+        return NodeWhile(boolexpr, stmt)
+        
+
+
     def parseStmt(self):
         """ generated source for method parseStmt """
         if self.curr() == Token("wr"):
@@ -114,6 +171,15 @@ class Parser(object):
         if self.curr() == Token('rd'):
             rd = self.parseRd()
             return NodeStmt(rd)
+        if self.curr() == Token('begin'): # begin node
+            bg = self.parseBg()
+            return NodeStmt(bg)
+        if self.curr() == Token('if'):
+            ifthen = self.parseIfThenElse()
+            return NodeStmt(ifthen)
+        if self.curr() == Token('while'):
+            while_loop = self.parseWhile()
+            return NodeStmt(while_loop)
         return None
 
     def parseBlock(self):
@@ -127,8 +193,9 @@ class Parser(object):
         #    raise SyntaxException(self.pos, self.curr(), 'end')
         block = NodeBlock(stmt, rest)
         return block
-
-
+    
+    
+    
     def parse(self, program):
         """ generated source for method parse """
         self.scanner = Scanner(program)
