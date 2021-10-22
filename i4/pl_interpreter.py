@@ -8,7 +8,7 @@ from pl_syntaxexception import SyntaxException
 from pl_evalexception import EvalException
 
 class Interpreter(object):
-    """ generated source for class Interpreter """
+    """ generated source for class Interpareter """
     @classmethod
     def main(cls, args):
         """ generated source for method main """
